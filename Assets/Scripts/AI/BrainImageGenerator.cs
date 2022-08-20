@@ -8,7 +8,7 @@ public class BrainImageGenerator
 {
     const int NODE_SIZE_PIXELS = 10;
     const int EDGE_DIR_SIZE_PIXELS = 5;
-    const int EDGE_THICKNESS_PIXELS = 3;
+    const float EDGE_THICKNESS_PIXELS = 1.2f;
     const int BRAIN_TO_IMAGE_SPACE = 50;
     static Color EDGE_COLOR = Color.red;
     static Color NODE_COLOR = Color.blue;

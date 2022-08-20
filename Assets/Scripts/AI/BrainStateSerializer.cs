@@ -15,7 +15,6 @@ public static class BrainStateSerializer
          * 1 -> output
          * 2 -> total
          * 30 -> iterations per second
-         * 0 -> current buffer idx
          * 0 0 -> biases
          * 0 0.6 -> weights
          * 0 0
@@ -32,8 +31,6 @@ public static class BrainStateSerializer
         result.Append($"{state.totalSize}\n");
         if (withPropertyNames) result.Append("Iterations per second:\n");
         result.Append($"{state.iterationsPerSecond}\n");
-        if (withPropertyNames) result.Append("Current buffer:\n");
-        result.Append($"{state.currentBufferIdx}\n");
 
         //BIASES
         if (withPropertyNames) result.Append("Biases:\n");
@@ -88,7 +85,6 @@ public static class BrainStateSerializer
 
         BrainState state = new BrainState(inputSize, outputSize, totalSize, iterationsPerSecond);
         state.iterationsPerSecond = iterationsPerSecond;
-        state.currentBufferIdx = currentBufferIdx;
 
         Read1DArray(lines[currentLine++], state.biases);
         Read1DArray(lines[currentLine++], state.passivity);

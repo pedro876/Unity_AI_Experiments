@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class BrainDisplay : MonoBehaviour
 {
+    [Header("Generation log")]
+    [SerializeField] float lastGenerationSeconds;
+    [Header("Configuration")]
     [SerializeField] float updateTime = 1f;
     [SerializeField] float zoom = 1f;
     [SerializeField] Vector2 displacement = Vector2.zero;
@@ -36,8 +39,9 @@ public class BrainDisplay : MonoBehaviour
         {
             if(resMultiplier > 0.01f)
             {
-                tex = new Texture2D((int)(rect.rect.width * resMultiplier), (int)(rect.rect.height * resMultiplier));
-                tex.filterMode = FilterMode.Point;
+                target.brain = BrainFactory.CreateMutation(target.brain);
+                //tex = new Texture2D((int)(rect.rect.width * resMultiplier), (int)(rect.rect.height * resMultiplier));
+                //tex.filterMode = FilterMode.Point;
                 imgGenerator = new BrainImageGenerator(target.brain.state, tex.width, tex.height, resMultiplier);
                 image.texture = tex;
 
@@ -46,6 +50,7 @@ public class BrainDisplay : MonoBehaviour
                 imgGenerator.displacementY = displacement.y;
                 //Debug.Log(imgGenerator.zoom);
                 Color[] colors = imgGenerator.GenerateImage(out double generationSeconds);
+                lastGenerationSeconds = (float)generationSeconds;
                 //Debug.Log(generationSeconds);
                 tex.SetPixels(colors);
                 tex.Apply();

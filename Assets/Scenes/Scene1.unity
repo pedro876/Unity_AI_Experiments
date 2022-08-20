@@ -239,6 +239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isWhite: 0
   iterationsPerSecond: 60
+  initialMutations: 0
 --- !u!1 &113469113
 GameObject:
   m_ObjectHideFlags: 0
@@ -1531,10 +1532,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e307feaac12de64bbfa9322f8c9d63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateTime: 0.1
-  zoom: 3
+  lastGenerationSeconds: 0
+  updateTime: 1
+  zoom: 2
   displacement: {x: 0, y: 0}
-  resMultiplier: 0.5
+  resMultiplier: 1
   target: {fileID: 52536548}
 --- !u!1 &864845112
 GameObject:
