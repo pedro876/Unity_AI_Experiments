@@ -2,15 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro;
 
 public class TileAgentController : MonoBehaviour
 {
-    private bool isWhite = false;
     [SerializeField] float maxLifeSeconds = 10;
     [SerializeField] float currentLife = 0;
-    TileRaycast tileRaycast;
-    SpriteRenderer sprite;
-    TileAgentInputBase input;
+    [SerializeField]TextMeshProUGUI hpText;
+
+    private bool isWhite = false;
+    private TileRaycast tileRaycast;
+    private SpriteRenderer sprite;
+    private TileAgentInputBase input;
 
     public event Action onDead;
     static readonly Color deadColor = Color.red;
@@ -20,7 +23,6 @@ public class TileAgentController : MonoBehaviour
     public void ReplenishHealth()
     {
         currentLife = maxLifeSeconds;
-        
     }
 
     private void SetIsWhite(bool isWhite)
@@ -47,7 +49,7 @@ public class TileAgentController : MonoBehaviour
 
         if (currentLife > 0f)
         {
-            if (tileRaycast.isWhite != isWhite)
+            if (tileRaycast.detectsSomething && tileRaycast.isWhite != isWhite)
             {
                 currentLife -= Time.deltaTime;
                 if (currentLife < 0f)
@@ -56,6 +58,8 @@ public class TileAgentController : MonoBehaviour
                     sprite.color = deadColor;
                 }
             }
+
+            hpText.text = "HP:"+(((int)(currentLife * 10f)) / 10f).ToString();
         }
     }
 }

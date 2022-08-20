@@ -4,71 +4,79 @@ using UnityEngine;
 
 public class Brain
 {
-    int inputNeuronsAmount;
-    int outputNeuronsAmount;
-    int totalNeurons;
+    public BrainState state;
+    private float iterationReminder;
 
-    private float[] biases;
-    private float[,] weights;
-    private bool[,] adjacencies;
-    private float[] valuesBuffer0;
-    private float[] valuesBuffer1;
-    private int currentBufferIdx = 0;
-
-    public Brain(int inputCount, int outputCount)
+    public Brain(BrainState state)
     {
-        inputNeuronsAmount = inputCount;
-        outputNeuronsAmount = outputCount;
-        totalNeurons = inputCount + outputCount;
-        biases = new float[totalNeurons];
-        weights = new float[totalNeurons, totalNeurons];
-        adjacencies = new bool[totalNeurons, totalNeurons];
-        valuesBuffer0 = new float[totalNeurons];
-        valuesBuffer1 = new float[totalNeurons];
-
-        // TEST
-        weights[0, 1] = 0.6f;
-        adjacencies[0, 1] = true;
+        this.state = state;
+        iterationReminder = 0f;
     }
+
+    public float GetOutputAt(int index) => state.GetOutputAt(index);
 
     public void Propagate(float[] input, float deltaTime)
     {
-        float[] frontBuffer = currentBufferIdx == 0 ? valuesBuffer0 : valuesBuffer1;
-        float[] backBuffer = currentBufferIdx == 0 ? valuesBuffer1 : valuesBuffer0;
-
         // FILL INPUT
         for (int i = 0; i < input.Length; i++)
         {
-            frontBuffer[i] = input[i];
+            state.frontBuffer[i] = input[i];
+        }
+
+        // CALCULATE ITERATIONS
+        int iterations = CalculateIterations(deltaTime);
+
+        // PERFORM ITERATIONS
+        for (int i = 0; i < iterations; i++)
+        {
+            IterateNetwork();
+        }
+    }
+
+    private int CalculateIterations(float deltaTime)
+    {
+        float time = deltaTime + iterationReminder;
+        float iterationsRaw = time * state.iterationsPerSecond;
+        float decimalPart = iterationsRaw - (int)iterationsRaw;
+        int iterations = Mathf.RoundToInt(iterationsRaw);
+
+        float secondsPerIteration = 1f / state.iterationsPerSecond;
+        if (decimalPart >= 0.5f)
+            iterationReminder = (1f - decimalPart) * -secondsPerIteration;
+        else
+            iterationReminder = decimalPart * secondsPerIteration;
+
+        return iterations;
+    }
+
+    private void IterateNetwork()
+    {
+        //PERSISTENCE VALUES
+        for (int i = state.inputSize; i < state.totalSize; i++)
+        {
+            state.frontBuffer[i] = state.frontBuffer[i] * state.persistence[i];
         }
 
         // PROPAGATE VALUES ACROSS NETWORK
-        for(int i = 0; i < totalNeurons; i++)
+        for (int i = state.inputSize; i < state.totalSize; i++)
         {
-            backBuffer[i] = biases[i];
             // For each neuron we must add the sum of values * weight + bias
-            for (int j = 0; j < totalNeurons; j++)
+            state.backBuffer[i] = state.biases[i];
+            for (int j = 0; j < state.totalSize; j++)
             {
-                if(adjacencies[j,i])
+                if (state.adjacencies[j, i])
                 {
-                    backBuffer[i] += weights[j, i] * frontBuffer[j];
+                    state.backBuffer[i] += state.weights[j, i] * state.frontBuffer[j];
                 }
             }
             // RELU
-            backBuffer[i] = Mathf.Max(0, backBuffer[i]);
+            state.backBuffer[i] = Mathf.Max(0, state.backBuffer[i]);
         }
 
-        SwapBuffers();
-    }
-
-    public float GetOutputAt(int outputIndex)
-    {
-        float[] frontBuffer = currentBufferIdx == 0 ? valuesBuffer0 : valuesBuffer1;
-        return frontBuffer[inputNeuronsAmount + outputIndex];
-    }
-
-    private void SwapBuffers()
-    {
-        currentBufferIdx = (currentBufferIdx + 1) % 2;
+        //PROCESS FINAL INPUT VALUE INTO EACH NEURON
+        for(int i = state.inputSize; i < state.totalSize; i++)
+        {
+            state.frontBuffer[i] += state.backBuffer[i] * state.passivity[i];
+        }
     }
 }
